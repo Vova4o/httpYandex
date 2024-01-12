@@ -1,6 +1,5 @@
-// Клиент для отправки запросов на сервер
-// весь предидущий код закоментирован и находится ниже, при желании его можно востановить и использовать.
-// В данном примере мы рассмотрим как отправлять запросы на сервер при помощи http.Get и http.PostForm
+// Опять меняем клиентску часть
+// Пробуем с запущенным сервером отправить запрос на сервер
 package main
 
 import (
@@ -10,47 +9,83 @@ import (
 	"net/url"
 )
 
-// PrintAnswer - функция для вывода ответа сервера
-func PrintAnswer(w *http.Response) {
-	// читаем тело ответа
-	body, err := io.ReadAll(w.Body)
-	// обязательно закрываем тело ответа
-	w.Body.Close()
+func main() {
+	// POST запрос - отправка пустой формы
+	resp, err := http.PostForm("http://localhost:8080/", url.Values{})
 	// обрабатываем ошибку
 	if err != nil {
-		fmt.Println("Ошибка:", err)
+		fmt.Println("Ошибка", err)
+		return
+	}
+
+	// выводим в консоль код статуса ответа сервера
+	fmt.Println("Код статуса:", resp.StatusCode)
+	// читаем тело ответа
+	body, err := io.ReadAll(resp.Body)
+	// обязательно закрываем тело ответа
+	resp.Body.Close()
+	// обрабатываем ошибку
+	if err != nil {
+		fmt.Println("Ошибка", err)
 		return
 	}
 	// выводим тело ответа в консоль
 	fmt.Println(string(body))
 }
 
-func main() {
-	// Get - метод, который отправляет GET запрос на сервер
-	resp, err := http.Get("http://localhost:8080/")
-	// обрабатываем ошибку
-	if err != nil {
-		fmt.Println("Ошибка:", err)
-		return
-	}
-	// выводим ответ сервера в консоль
-	PrintAnswer(resp)
+// // Клиент для отправки запросов на сервер
+// // весь предидущий код закоментирован и находится ниже, при желании его можно востановить и использовать.
+// // В данном примере мы рассмотрим как отправлять запросы на сервер при помощи http.Get и http.PostForm
+// package main
 
-	// PostForm - функция, которая отправляет POST запрос на сервер
-	// добавляем url.Values, в котором указываем параметры запроса
-	// email и name
-	resp, err = http.PostForm("http://localhost:8080/", url.Values{
-		"email": {"my@my-best-site.ru"},
-		"name":  {"Василий"},
-	})
-	// обрабатываем ошибку
-	if err != nil {
-		fmt.Println("Ошибка:", err)
-		return
-	}
-	// выводим ответ сервера в консоль
-	PrintAnswer(resp)
-}
+// import (
+// 	"fmt"
+// 	"io"
+// 	"net/http"
+// 	"net/url"
+// )
+
+// // PrintAnswer - функция для вывода ответа сервера
+// func PrintAnswer(w *http.Response) {
+// 	// читаем тело ответа
+// 	body, err := io.ReadAll(w.Body)
+// 	// обязательно закрываем тело ответа
+// 	w.Body.Close()
+// 	// обрабатываем ошибку
+// 	if err != nil {
+// 		fmt.Println("Ошибка:", err)
+// 		return
+// 	}
+// 	// выводим тело ответа в консоль
+// 	fmt.Println(string(body))
+// }
+
+// func main() {
+// 	// Get - метод, который отправляет GET запрос на сервер
+// 	resp, err := http.Get("http://localhost:8080/")
+// 	// обрабатываем ошибку
+// 	if err != nil {
+// 		fmt.Println("Ошибка:", err)
+// 		return
+// 	}
+// 	// выводим ответ сервера в консоль
+// 	PrintAnswer(resp)
+
+// 	// PostForm - функция, которая отправляет POST запрос на сервер
+// 	// добавляем url.Values, в котором указываем параметры запроса
+// 	// email и name
+// 	resp, err = http.PostForm("http://localhost:8080/", url.Values{
+// 		"email": {"my@my-best-site.ru"},
+// 		"name":  {"Василий"},
+// 	})
+// 	// обрабатываем ошибку
+// 	if err != nil {
+// 		fmt.Println("Ошибка:", err)
+// 		return
+// 	}
+// 	// выводим ответ сервера в консоль
+// 	PrintAnswer(resp)
+// }
 
 // // Создание клиента для отправки запросов на сервер
 // // Отправка формы
