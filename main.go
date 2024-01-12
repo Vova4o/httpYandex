@@ -2,25 +2,53 @@
 // весь предидущуй код находится ниже в коментариях, при желании, его можно восстановить и использовать.
 // в данном примере мы получаем данные из формы и выводим их в ответ
 // вместе с серверной частью мы поменяем и клиентскую часть, чтобы отправлять данные на сервер
+
+// в данном примере мы говорим серверу, что он должен принимать только GET запросы
+// в случае отправки POST запроса, сервер будет выводить сообщение о том, что он принимает только GET запросы
+// в случае GET запроса сервер будет выводить сообщение о том, что он принял GET запрос
+
 package main
 
 import (
 	"fmt"
-	"io"
 	"net/http"
 )
 
+// html - шаблон для вывода ответа
+const pattern = `<!DOCTYPE html>
+  <html lang="ru"><head>
+  <meta charset="utf-8" />
+  <title>Тестовый сервер</title>
+  </head>
+<body>%s</body></html>`
+
 // mainHandle - обработчик запросов
 func mainHandle(w http.ResponseWriter, req *http.Request) {
-	// проверяем метод запроса - если POST, то выводим форму
-	if req.Method == http.MethodPost {
-		fmt.Fprintf(w, "Email: %s\nName: %s",
-			req.PostFormValue("email"), req.PostFormValue("name"))
+	// устанавливаем заголовок Content-Type
+	w.Header().Set("Content-Type", "text/html; charset=utf-8")
+	// делаем проверку, если метод запроса не GET, то выводим сообщение о том, что сервер принимает только GET запросы
+	if req.Method != http.MethodGet {
+		// запишем в Header статус 405 - метод не поддерживается (StatusMethodNotAllowed)
+		w.WriteHeader(http.StatusMethodNotAllowed)
+		// выводим ответ в шаблон
+		fmt.Fprintf(w, pattern, "Сервер поддерживает только GET-запросы")
 		return
 	}
-	// если метод запроса GET, то выводим форму
-	io.WriteString(w, "Отправьте POST запрос с параметрами email и name")
+	// Передаем в шаблон ответа строку с сообщением о том, что сервер принял GET запрос
+	fmt.Fprintf(w, pattern, "Получен GET-запрос")
 }
+
+// // mainHandle - обработчик запросов
+// func mainHandle(w http.ResponseWriter, req *http.Request) {
+// 	// проверяем метод запроса - если POST, то выводим форму
+// 	if req.Method == http.MethodPost {
+// 		fmt.Fprintf(w, "Email: %s\nName: %s",
+// 			req.PostFormValue("email"), req.PostFormValue("name"))
+// 		return
+// 	}
+// 	// если метод запроса GET, то выводим форму
+// 	io.WriteString(w, "Отправьте POST запрос с параметрами email и name")
+// }
 
 func main() {
 	// HandleFunc - добавляем обработчик запросов по корневому пути "/"
