@@ -1,11 +1,23 @@
 // Создание клиента для отправки запросов на сервер
-// Добавление HTTP-заголовков
+// Отправка формы
+/*
+Если пользователь заполняет и отправляет с сайта какую-либо форму, то по умолчанию указанные им данные отправляются на сервер методом POST.
+Чтобы эммулировать отправку форму со стороны клиента, можно использовать функцию http.Post() или client.Post().
+При этом необходимо указать корректный Content-Type и перекодировать отправляемые данные.
+
+Но есть более простой путь.
+Специально для отправки формы существует метод
+(c *Client) PostForm(url string, data url.Values) (resp *Response, err error)
+и его функция-обёртка
+http.PostForm(url string, data url.Values) (resp *Response, err error)
+*/
 package main
 
 import (
 	"fmt"
 	"io"
 	"net/http"
+	"net/url"
 	"time"
 )
 
@@ -18,6 +30,32 @@ func main() {
 	client := &http.Client{
 		Timeout: 1 * time.Second,
 	}
+
+	// PostForm - функция, которая отправляет POST запрос на сервер
+	// функция PostForm возвращает два значения: ответ сервера и ошибку (если она есть)
+	// функция PostForm принимает два параметра:
+	// 1. url - адрес сервера, на который отправляется запрос
+	// 2. тело запроса, в нашем случае тело запроса это форма, которую мы отправляем на сервер
+	//	response, err := http.PostForm("http://localhost:8080/",
+	//    url.Values{"nickname": {"Student"}, "feedback": {"Всё отлично!"}})
+
+	// Предидущий код можно заменить на этот
+	// создаем переменную values типа url.Values
+	values := url.Values{}
+
+	// добавляем в переменную values (при помощи метода Set) два значения nickname и feedback
+	values.Set("nickname", "Student")
+	values.Set("feedback", "Всё отлично!")
+
+	// в PostForm в качестве тела запроса передаем переменную values
+	response, err := http.PostForm("http://localhost:8080/", values)
+	// обрабатываем ошибку
+	if err != nil {
+		fmt.Println("Ошибка отправки запроса:", err)
+		return
+	}
+
+	fmt.Println(response)
 
 	// NewRequest - функция, которая создает новый запрос
 	// создаем запрос с методом GET, адресом http://localhost:8080/time и телом nil
@@ -45,7 +83,7 @@ func main() {
 	// Do - метод, который отправляет запрос на сервер и получает ответ
 	// в переменную response записываем ответ сервера, а в переменную err ошибку (если она есть)
 	// вместо Do можно использовать client.Get, client.Post, client.Put, client.Delete
-	response, err := client.Do(request)
+	response, err = client.Do(request)
 	// обрабатываем ошибку
 	if err != nil {
 		fmt.Println("Ошибка отправки запроса:", err)
